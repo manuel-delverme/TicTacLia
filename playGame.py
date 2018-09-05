@@ -18,9 +18,52 @@ def lia_s_agent(board):
 
 def check_winner(board):
     # TODO: Lia's stuff
-    return 'X'
-    # return 'O'    
-    # return None
+    # for 'X' now
+    # vertical matches
+    if board [0][0] == "X" and board[1][0] == "X" and board[2][0] == "X":
+        return 'X'
+    if board[0][1] == "X" and board[1][1] == "X" and board[2][1] == "X":
+        return 'X'
+    if board[0][2] == "X" and board[1][2] == "X" and board[2][2] == "X":
+        return 'X'
+    # horizontal matches
+    if board [0][0] == "X" and board[0][1] == "X" and board[0][2] == "X":
+        return 'X'
+    if board [1][0] == "X" and board[1][1] == "X" and board[1][2] == "X":
+        return 'X'
+    if board [2][0] == "X" and board[2][1] == "X" and board[2][1] == "X":
+        return 'X'
+
+    # for diagonal matches
+    if board [0][0] == "X" and board[1][1] == "X" and board[2][2] == "X":
+        return 'X'
+    if board [0][2] == "X" and board[1][1] == "X" and board[2][0] == "X":
+        return 'X'
+
+    # for 'O' now
+    # vertical matches
+    if board[0][0] == "O" and board[1][0] == "O" and board[2][0] == "O":
+        return 'X'
+    if board[0][1] == "O" and board[1][1] == "O" and board[2][1] == "O":
+        return 'X'
+    if board[0][2] == "O" and board[1][2] == "O" and board[2][2] == "O":
+        return 'X'
+
+    # horizontal matches
+    if board[0][0] == "O" and board[0][1] == "O" and board[0][2] == "O":
+        return 'X'
+    if board[1][0] == "O" and board[1][1] == "O" and board[1][2] == "O":
+        return 'X'
+    if board[2][0] == "O" and board[2][1] == "O" and board[2][1] == "O":
+        return 'X'
+
+    # for diagonal matches
+    if board[0][0] == "O" and board[1][1] == "O" and board[2][2] == "O":
+        return 'X'
+    if board[0][2] == "O" and board[1][1] == "O" and board[2][0] == "O":
+        return 'O'
+    else:
+        return None
 
 board = [
 [' ',' ',' ',],
