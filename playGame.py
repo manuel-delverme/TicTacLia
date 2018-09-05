@@ -1,6 +1,8 @@
+import random
+
 def manu_s_agent(board):
-    row = np.random.randint(0, 3)
-    column = np.random.randint(0, 3)
+    row = random.randint(0, 3)
+    column = random.randint(0, 3)
     
     if board[row][column] != ' ':
         return manu_s_agent(board)
@@ -8,8 +10,8 @@ def manu_s_agent(board):
 
 
 def lia_s_agent(board):
-    row = np.random.randint(0, 3)
-    column = np.random.randint(0, 3)
+    row = random.randint(0, 3)
+    column = random.randint(0, 3)
     if board[row][column] != ' ':
         return lia_s_agent(board)
     return row, column
@@ -20,9 +22,9 @@ board = [
 [' ',' ',' ',],
 [' ',' ',' ',],
 ]
-import numpy as np
+# import numpy as np
 
-turn = np.random.randint(0, 2)
+turn = random.randint(0, 2)
 print("======= GAME STARTED =======")
 for _ in range(9):
     print('turn', turn)
