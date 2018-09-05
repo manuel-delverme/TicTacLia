@@ -16,6 +16,11 @@ def lia_s_agent(board):
         return lia_s_agent(board)
     return row, column
 
+def check_winner(board):
+    # TODO: Lia's stuff
+    return 'X'
+    # return 'O'    
+    # return None
 
 board = [
 [' ',' ',' ',],
