@@ -13,10 +13,16 @@ def lia_s_agent(board):
 
     row = random.randint(0, 2)
     column = random.randint(0, 2)
+    if board[1][1] == ' ':
+        row = 1
+        column = 1
+        return row, column
+
     if board[row][column] != ' ':
         return lia_s_agent(board)
 
     return row, column
+
 
 
 def check_winner(board):
@@ -74,7 +80,6 @@ for game_nr in range(nr_games_to_play):
         [' ', ' ', ' ', ],
         [' ', ' ', ' ', ],
     ]
-
     while True:
         print('turn', turn)
         if who_plays == 0:
