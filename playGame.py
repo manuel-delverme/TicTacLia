@@ -72,7 +72,8 @@ leaderboard = {
 }
 
 for game_nr in range(nr_games_to_play):
-    print("======= GAME nr {} STARTED =======".format(game_nr))
+    if game_nr < 100:
+        print("======= GAME nr {} STARTED =======".format(game_nr))
     who_plays = random.randint(0, 1)
     turn = 0
     board = [
@@ -81,10 +82,12 @@ for game_nr in range(nr_games_to_play):
         [' ', ' ', ' ', ],
     ]
     while True:
-        print('turn', turn)
+        if game_nr < 100:
+            print('turn', turn)
         if who_plays == 0:
             row, column = lia_s_agent(board)
-            print('Lia picked',  row, column)
+            if game_nr < 100:
+                print('Lia picked',  row, column)
 
             if board[row][column] != ' ':
                 print('Lia cheated!')
@@ -94,7 +97,8 @@ for game_nr in range(nr_games_to_play):
 
         elif who_plays == 1:
             row, column = manu_s_agent(board)
-            print('Manu picked', row, column)
+            if game_nr < 100:
+                print('Manu picked', row, column)
 
             # this check if a new place is being overwritten
             if board[row][column] != ' ':
@@ -104,25 +108,29 @@ for game_nr in range(nr_games_to_play):
             who_plays = 0
 
         # end of the turn
-        for row in board:
-            print(row)
-        print()
+        if game_nr < 100:
+            for row in board:
+                print(row)
+            print()
         turn += 1
 
         # checking who is the winner now
         winner = check_winner(board)
         if winner == 'X':
-            print("Manu wins a kiss from Lia")
+            if game_nr < 100:
+                print("Manu wins a kiss from Lia")
             leaderboard['Manu'] += 1
             break
         elif winner == 'O':
-            print("Lia wins ten kisses from Manu")
+            if game_nr < 100:
+                print("Lia wins ten kisses from Manu")
             leaderboard['Lia'] += 1
             break
         # check if game is draw, and exit loop
         else:
             if turn == 9:
-                print("It's a Draw")
+                if game_nr < 100:
+                    print("It's a Draw")
                 leaderboard['Draw'] += 1
                 break
 
