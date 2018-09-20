@@ -64,7 +64,7 @@ def check_winner(board):
         return False
 
 
-nr_games_to_play = 100
+nr_games_to_play = 10000
 leaderboard = {
     'Lia':0,
     'Manu': 0,
@@ -123,7 +123,7 @@ for game_nr in range(nr_games_to_play):
         else:
             if turn == 9:
                 print("It's a Draw")
-                leaderboard['Manu'] += 1
+                leaderboard['Draw'] += 1
                 break
 
 total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
