@@ -17,7 +17,6 @@ def lia_s_agent(board):
         row = 1
         column = 1
         return row, column
-
     if board[row][column] != ' ':
         return lia_s_agent(board)
 
