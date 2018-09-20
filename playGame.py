@@ -117,7 +117,7 @@ for game_nr in range(nr_games_to_play):
             break
         elif winner == 'O':
             print("Lia wins ten kisses from Manu")
-            leaderboard['Manu'] += 1
+            leaderboard['Lia'] += 1
             break
         # check if game is draw, and exit loop
         else:
@@ -125,4 +125,6 @@ for game_nr in range(nr_games_to_play):
                 print("It's a Draw")
                 leaderboard['Manu'] += 1
                 break
-print("win loss ratio", float(leaderboard['Manu'])/float(leaderboard['Lia']), leaderboard)
+
+total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
+print("win loss ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
