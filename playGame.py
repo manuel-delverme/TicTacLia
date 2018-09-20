@@ -1,7 +1,8 @@
-"""Tic Tac Toe Game between two lovers: Manu and Lia"""
+"""Tic Tac Toe Game between two lovers: input()"""
 
 
 import random
+
 
 # def choose_indexBoard(row, column, board):
 #     """Choose where to mark the board
@@ -66,10 +67,11 @@ def check_winner(board):
         return False
 
 
-nr_games_to_play = 3
+nr_games_to_play = 10
 for game_nr in range(nr_games_to_play):
     print("======= GAME nr {} STARTED =======".format(game_nr))
-    turn = random.randint(0, 2)
+    who_plays = random.randint(0, 1)
+    turn = 0
     board = [
         [' ', ' ', ' ', ],
         [' ', ' ', ' ', ],
@@ -78,25 +80,32 @@ for game_nr in range(nr_games_to_play):
 
     while True:
         print('turn', turn)
-        if turn % 2 == 0:
+        if who_plays == 0:
             row, column = lia_s_agent(board)
             print('Lia picked',  row, column)
 
-            # not sure what this does
             if board[row][column] != ' ':
                 print('Lia cheated!')
                 break
             board[row][column] = 'O'
+            who_plays = 1
 
-        elif turn % 2 == 1:
+        elif who_plays == 1:
             row, column = manu_s_agent(board)
             print('Manu picked', row, column)
-            # not sure what this does
+
+            # this check if a new place is being overwritten
             if board[row][column] != ' ':
                 print('Manu cheated!')
                 break
             board[row][column] = 'X'
+            who_plays = 0
+
         # end of the turn
+        for row in board:
+            print(row)
+        print()
+        turn += 1
 
         # checking who is the winner now
         winner = check_winner(board)
@@ -106,14 +115,11 @@ for game_nr in range(nr_games_to_play):
         elif winner == 'O':
             print("Lia wins ten kisses from Manu")
             break
-        # check if game is a draw, and exit loop
+        # check if game is draw, and exit loop
         else:
             if turn == 9:
                 print("It's a Draw")
                 break
 
-        turn += 1
 
-        for row in board:
-            print(row)
-        print()
+
