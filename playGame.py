@@ -1,16 +1,5 @@
 """Tic Tac Toe Game between two lovers: input()"""
-
-
 import random
-
-
-# def choose_indexBoard(row, column, board):
-#     """Choose where to mark the board
-#     for when we will play it ourlself"""
-#    return None
-
-
-
 
 def manu_s_agent(board):
     row = random.randint(0, 2)
@@ -21,10 +10,12 @@ def manu_s_agent(board):
 
 
 def lia_s_agent(board):
+
     row = random.randint(0, 2)
     column = random.randint(0, 2)
     if board[row][column] != ' ':
         return lia_s_agent(board)
+
     return row, column
 
 
@@ -67,7 +58,13 @@ def check_winner(board):
         return False
 
 
-nr_games_to_play = 10
+nr_games_to_play = 100
+leaderboard = {
+    'Lia':0,
+    'Manu': 0,
+    'Draw': 0
+}
+
 for game_nr in range(nr_games_to_play):
     print("======= GAME nr {} STARTED =======".format(game_nr))
     who_plays = random.randint(0, 1)
@@ -111,15 +108,16 @@ for game_nr in range(nr_games_to_play):
         winner = check_winner(board)
         if winner == 'X':
             print("Manu wins a kiss from Lia")
+            leaderboard['Manu'] += 1
             break
         elif winner == 'O':
             print("Lia wins ten kisses from Manu")
+            leaderboard['Manu'] += 1
             break
         # check if game is draw, and exit loop
         else:
             if turn == 9:
                 print("It's a Draw")
+                leaderboard['Manu'] += 1
                 break
-
-
-
+print("win loss ratio", float(leaderboard['Manu'])/float(leaderboard['Lia']), leaderboard)
