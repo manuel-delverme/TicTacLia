@@ -134,4 +134,4 @@ for game_nr in range(nr_games_to_play):
                 break
 
 total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
-print("win loss ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
+print("winning ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
