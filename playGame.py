@@ -1,11 +1,23 @@
 """Tic Tac Toe Game between two lovers: input()"""
 import random
 
-def manu_s_agent(board):
+def pick_random_move(board):
     row = random.randint(0, 2)
     column = random.randint(0, 2)
+
     if board[row][column] != ' ':
-        return manu_s_agent(board)
+        return pick_random_move(board)
+
+def manu_s_agent(board):
+    board_string = ''.join([item for sublist in board for item in sublist])
+    with open('manu_policy.txt') as fin:
+        for row in fin:
+            if row == board_string:
+                return -1
+
+    pick_random_move(board)
+    board[row][column] = ' '
+
     return row, column
 
 
@@ -64,75 +76,79 @@ def check_winner(board):
         return False
 
 
-nr_games_to_play = 10000
-leaderboard = {
-    'Lia':0,
-    'Manu': 0,
-    'Draw': 0
-}
+def main():
+    nr_games_to_play = 10000
+    leaderboard = {
+        'Lia':0,
+        'Manu': 0,
+        'Draw': 0
+    }
 
-for game_nr in range(nr_games_to_play):
-    if game_nr < 100:
-        print("======= GAME nr {} STARTED =======".format(game_nr))
-    who_plays = random.randint(0, 1)
-    turn = 0
-    board = [
-        [' ', ' ', ' ', ],
-        [' ', ' ', ' ', ],
-        [' ', ' ', ' ', ],
-    ]
-    while True:
+    for game_nr in range(nr_games_to_play):
         if game_nr < 100:
-            print('turn', turn)
-        if who_plays == 0:
-            row, column = lia_s_agent(board)
+            print("======= GAME nr {} STARTED =======".format(game_nr))
+        who_plays = random.randint(0, 1)
+        turn = 0
+        board = [
+            [' ', ' ', ' ', ],
+            [' ', ' ', ' ', ],
+            [' ', ' ', ' ', ],
+        ]
+        while True:
             if game_nr < 100:
-                print('Lia picked',  row, column)
-
-            if board[row][column] != ' ':
-                print('Lia cheated!')
-                break
-            board[row][column] = 'O'
-            who_plays = 1
-
-        elif who_plays == 1:
-            row, column = manu_s_agent(board)
-            if game_nr < 100:
-                print('Manu picked', row, column)
-
-            # this check if a new place is being overwritten
-            if board[row][column] != ' ':
-                print('Manu cheated!')
-                break
-            board[row][column] = 'X'
-            who_plays = 0
-
-        # end of the turn
-        if game_nr < 100:
-            for row in board:
-                print(row)
-            print()
-        turn += 1
-
-        # checking who is the winner now
-        winner = check_winner(board)
-        if winner == 'X':
-            if game_nr < 100:
-                print("Manu wins a kiss from Lia")
-            leaderboard['Manu'] += 1
-            break
-        elif winner == 'O':
-            if game_nr < 100:
-                print("Lia wins ten kisses from Manu")
-            leaderboard['Lia'] += 1
-            break
-        # check if game is draw, and exit loop
-        else:
-            if turn == 9:
+                print('turn', turn)
+            if who_plays == 0:
+                row, column = lia_s_agent(board)
                 if game_nr < 100:
-                    print("It's a Draw")
-                leaderboard['Draw'] += 1
-                break
+                    print('Lia picked',  row, column)
 
-total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
-print("win loss ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
+                if board[row][column] != ' ':
+                    print('Lia cheated!')
+                    break
+                board[row][column] = 'O'
+                who_plays = 1
+
+            elif who_plays == 1:
+                row, column = manu_s_agent(board)
+                if game_nr < 100:
+                    print('Manu picked', row, column)
+
+                # this check if a new place is being overwritten
+                if board[row][column] != ' ':
+                    print('Manu cheated!')
+                    break
+                board[row][column] = 'X'
+                who_plays = 0
+
+            # end of the turn
+            if game_nr < 100:
+                for row in board:
+                    print(row)
+                print()
+            turn += 1
+
+            # checking who is the winner now
+            winner = check_winner(board)
+            if winner == 'X':
+                if game_nr < 100:
+                    print("Manu wins a kiss from Lia")
+                leaderboard['Manu'] += 1
+                break
+            elif winner == 'O':
+                if game_nr < 100:
+                    print("Lia wins ten kisses from Manu")
+                leaderboard['Lia'] += 1
+                break
+            # check if game is draw, and exit loop
+            else:
+                if turn == 9:
+                    if game_nr < 100:
+                        print("It's a Draw")
+                    leaderboard['Draw'] += 1
+                    break
+
+    total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
+    print("win loss ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
+
+if __name__ == "__main__":
+    main()
