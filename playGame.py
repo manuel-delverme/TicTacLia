@@ -41,7 +41,7 @@ def lia_s_agent(board):
                         column = 0
                         return row, column
                 if count_freeSpace == 7:
-                    if board[1][1] == '0':
+                    if board[1][1] == 'O':
                         if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
                             row = 0
                             column = 0
