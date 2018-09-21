@@ -19,7 +19,6 @@ def choose_move(board):
     return -1
 
 def main():
-    # import ipdb; ipdb.set_trace()
     policy = {}
     boards = itertools.product(' XO', repeat=9)
     for board_string in tqdm.tqdm(boards):
@@ -36,9 +35,8 @@ def main():
             continue
 
         policy[''.join(board_string)] = choose_move(board)
-        # print(''.join(board_string))
 
-    with open('policy.txt', 'w') as fout:
+    with open('manu_policy.txt', 'w') as fout:
         for k,v in policy.items():
             fout.write(str(k) + ":" + str(v) + "\n")
 
