@@ -11,6 +11,7 @@ def pick_random_move(board):
 
 manu_policy = {}
 def manu_s_agent(board):
+    return pick_random_move(board)
     board_string = ''.join([item for sublist in board for item in sublist])
     if len(manu_policy) == 0:
         with open('manu_policy.txt') as fin:
@@ -41,51 +42,56 @@ def lia_s_agent(board):
             if board[rowLoop][columnLoop] == ' ':
                 count_freeSpace += 1
 
-                if count_freeSpace == 9:
-                    row = 1
+    if count_freeSpace == 9:
+        row = 1
+        column = 1
+        return row, column
+
+    if count_freeSpace == 8:
+        if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
+            row = 1
+            column = 1
+            return row, column
+        if board[1][1] == 'X':
+            row = 0
+            column = 0
+            return row, column
+
+    if count_freeSpace == 7:
+        if board[1][1] == 'O':
+            if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
+                row = 0
+                column = 0
+                return row, column
+            else:
+                row = 1
+                column = random.choice([0, 2])
+                return row, column
+        if board[1][1] == 'X':
+            if board[0][0] != ' ':
+                row = 0
+                column = 1
+                return row, column
+            else:
+                if board[0][2] != ' ':
+                    row = 0
                     column = 1
                     return row, column
-                if count_freeSpace == 8:
-                    if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
-                        row = 1
+                else:
+                    if board[2][2] != ' ':
+                        row = 2
                         column = 1
                         return row, column
-                    if board[1][1] == 'X':
-                        row = 0
-                        column = 0
-                        return row, column
-                if count_freeSpace == 7:
-                    if board[1][1] == 'O':
-                        if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
-                            row = 0
+                    else:
+                        if board[2][0] != ' ':
+                            row = 1
                             column = 0
                             return row, column
-                        else:
-                            row = 1
-                            column = random.choice([0, 2])
-                            return row, column
-                    if board[1][1] == 'X':
-                        if board[0][0] != ' ':
-                            row = 0
-                            column = 1
-                            return row, column
-                        else:
-                            if board[0][2] != ' ':
-                                row = 0
-                                column = 1
-                                return row, column
-                            else:
-                                if board[2][2] != ' ':
-                                    row = 2
-                                    column = 1
-                                    return row, column
-                                else:
-                                    if board[2][0] != ' ':
-                                        row = 1
-                                        column = 0
-                                        return row, column
-                if count_freeSpace <= 6:
-                    return pick_random_move(board)
+        
+    if count_freeSpace <= 6:
+        return pick_random_move(board)
+
+    return pick_random_move(board)
 
                 # 6 free spaces left
                 # if count_freeSpace == 6:
