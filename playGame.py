@@ -9,16 +9,20 @@ def pick_random_move(board):
         return pick_random_move(board)
     return row, column
 
+manu_policy = {}
 def manu_s_agent(board):
     board_string = ''.join([item for sublist in board for item in sublist])
-    try:
+    if len(manu_policy) == 0:
         with open('manu_policy.txt') as fin:
-            import ipdb; ipdb.set_trace()
             for row in fin:
-                if row == board_string:
-                    return -1
-    except FileNotFoundError as e:
-        return pick_random_move(board)
+                state, action = row[:-1].split(':')
+                if action != '-1':
+                    manu_policy[state] = [int(a) for a in action[1:-1].split(',')]
+
+    if board_string in manu_policy:
+        return manu_policy[board_string]
+    # return pick_random_move(board)
+    return pick_random_move(board)
 
 
 def manu_input(board):
@@ -31,13 +35,12 @@ def manu_input(board):
     return row, column
 
 def lia_s_agent(board):
-    # row = random.randint(0, 2)
-    # column = random.randint(0, 2)
     count_freeSpace = 0
     for rowLoop in range(len(board)):
         for columnLoop in range(len(board[rowLoop])):
             if board[rowLoop][columnLoop] == ' ':
                 count_freeSpace += 1
+
                 if count_freeSpace == 9:
                     row = 1
                     column = 1
@@ -82,9 +85,7 @@ def lia_s_agent(board):
                                         column = 0
                                         return row, column
                 if count_freeSpace <= 6:
-                    row = random.randint(0, 2)
-                    column = random.randint(0, 2)
-                    return row, column
+                    return pick_random_move(board)
 
                 # 6 free spaces left
                 # if count_freeSpace == 6:

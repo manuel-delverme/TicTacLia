@@ -9,7 +9,7 @@ def wound_i_win(board, row, column):
     board[row][column] = 'O'
     answer = playGame.check_winner(board)
     board[row][column] = ' '
-    return answer
+    return answer == 'O'
 
 def choose_move(board):
     for row in range(3):
