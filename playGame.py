@@ -1,5 +1,6 @@
 """Tic Tac Toe Game between two lovers: input()"""
 import random
+import argparse
 
 def pick_random_move(board):
     row = random.randint(0, 2)
@@ -11,8 +12,8 @@ def pick_random_move(board):
 
 manu_policy = {}
 def manu_s_agent(board):
-    return pick_random_move(board)
     board_string = ''.join([item for sublist in board for item in sublist])
+    if len(manu_policy) == 0:
     if len(manu_policy) == 0:
         with open('manu_policy.txt') as fin:
             for row in fin:
@@ -90,7 +91,6 @@ def lia_s_agent(board):
 
     if count_freeSpace <= 6:
         return pick_random_move(board)
-
     return pick_random_move(board)
 
                 # 6 free spaces left
@@ -154,7 +154,7 @@ def check_winner(board):
         return False
 
 
-def main():
+def main(args):
     nr_games_to_play = 10000
     leaderboard = {
         'Lia':0,
@@ -188,7 +188,11 @@ def main():
                 who_plays = 1
 
             elif who_plays == 1:
-                row, column = manu_s_agent(board)
+                if args.manu_is_drunk:
+                    row, column = pick_random_move(board)
+                else:
+                    row, column = manu_s_agent(board)
+
                 if game_nr < 100:
                     print('Manu picked', row, column)
                 # this check if a new place is being overwritten
@@ -229,4 +233,7 @@ def main():
     print("winning ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--manu_is_drunk', '-M', dest='manu_is_drunk', action='store_true', help='check whether manu should play randomly')
+    args = parser.parse_args()
+    main(args)
