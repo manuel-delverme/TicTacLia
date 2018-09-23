@@ -27,53 +27,53 @@ def lia_s_agent(board):
         for columnLoop in range(len(board[rowLoop])):
             if board[rowLoop][columnLoop] == ' ':
                 count_freeSpace += 1
-                if count_freeSpace == 9:
+            if count_freeSpace == 9:
+                row = 1
+                column = 1
+                return row, column
+            if count_freeSpace == 8:
+                if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
                     row = 1
                     column = 1
                     return row, column
-                if count_freeSpace == 8:
+                if board[1][1] == 'X':
+                    row = 0
+                    column = 0
+                    return row, column
+            if count_freeSpace == 7:
+                if board[1][1] == 'O':
                     if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
-                        row = 1
-                        column = 1
-                        return row, column
-                    if board[1][1] == 'X':
                         row = 0
                         column = 0
                         return row, column
-                if count_freeSpace == 7:
-                    if board[1][1] == 'O':
-                        if board[0][1] == 'X' or board[1][0] == 'X' or board[1][2] == 'X' or board[2][1] == 'X':
-                            row = 0
-                            column = 0
-                            return row, column
-                        else:
-                            row = 1
-                            column = random.choice([0, 2])
-                            return row, column
-                    if board[1][1] == 'X':
-                        if board[0][0] != ' ':
+                    else:
+                        row = 1
+                        column = random.choice([0, 2])
+                        return row, column
+                if board[1][1] == 'X':
+                    if board[0][0] != ' ':
+                        row = 0
+                        column = 1
+                        return row, column
+                    else:
+                        if board[0][2] != ' ':
                             row = 0
                             column = 1
                             return row, column
                         else:
-                            if board[0][2] != ' ':
-                                row = 0
+                            if board[2][2] != ' ':
+                                row = 2
                                 column = 1
                                 return row, column
                             else:
-                                if board[2][2] != ' ':
-                                    row = 2
-                                    column = 1
+                                if board[2][0] != ' ':
+                                    row = 1
+                                    column = 0
                                     return row, column
-                                else:
-                                    if board[2][0] != ' ':
-                                        row = 1
-                                        column = 0
-                                        return row, column
-                if count_freeSpace <= 6:
-                    row = random.randint(0, 2)
-                    column = random.randint(0, 2)
-                    return row, column
+            if count_freeSpace <= 6:
+                row = random.randint(0, 2)
+                column = random.randint(0, 2)
+                return row, column
 
                 # 6 free spaces left
                 # if count_freeSpace == 6:
