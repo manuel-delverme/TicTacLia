@@ -4,7 +4,8 @@ import argparse
 import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+# import pandas as pd
+import os.path
 
 def pick_random_move(board):
     row = random.randint(0, 2)
@@ -17,6 +18,10 @@ def pick_random_move(board):
 manu_policy = {}
 def manu_s_agent(board):
     board_string = ''.join([item for sublist in board for item in sublist])
+    if not os.path.isfile('manu_policy.txt'):
+        import generate_manu_policy
+        generate_manu_policy.main()
+
     if len(manu_policy) == 0:
         with open('manu_policy.txt') as fin:
             for row in fin:
@@ -171,10 +176,12 @@ def main(args):
 
         print("The variance of {} games size is: {}".format (game_size, variance))
     plt.loglog(nr_games_to_play, variances)
-
-    plt.show()
-
-
+    plt.title("manu_is_drunk={}".format(args.manu_is_drunk))
+    try:
+        plt.show()
+    except UserError:
+        print('trying to save to file')
+        plt.savefig("/tmp/variance.png")
 
 
 
@@ -262,3 +269,4 @@ if __name__ == "__main__":
     parser.add_argument('--manu_is_drunk', '-M', dest='manu_is_drunk', action='store_true', help='check whether manu should play randomly')
     args = parser.parse_args()
     main(args)
+    print(args)
