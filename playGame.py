@@ -1,6 +1,10 @@
 """Tic Tac Toe Game between two lovers: input()"""
 import random
 import argparse
+import tqdm
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
 def pick_random_move(board):
     row = random.randint(0, 2)
@@ -13,7 +17,6 @@ def pick_random_move(board):
 manu_policy = {}
 def manu_s_agent(board):
     board_string = ''.join([item for sublist in board for item in sublist])
-    if len(manu_policy) == 0:
     if len(manu_policy) == 0:
         with open('manu_policy.txt') as fin:
             for row in fin:
@@ -155,15 +158,36 @@ def check_winner(board):
 
 
 def main(args):
-    nr_games_to_play = 10000
+    variances = []
+    nr_games_to_play = [10, 100, 1000, 10000]
+    for game_size in nr_games_to_play:
+        samples = []
+        gameRatio = play_games(args, game_size, 0)
+        for sample in range(5):
+            varRatio = play_games(args, game_size, 0)
+            samples.append(varRatio)
+        variance = np.var(samples)
+        variances.append(variance)
+
+        print("The variance of {} games size is: {}".format (game_size, variance))
+    plt.loglog(nr_games_to_play, variances)
+
+    plt.show()
+
+
+
+
+
+def play_games(args, nr_games_to_play, gameShow):
+    # nr_games_to_play = [10, 100, 1000, 10000]
     leaderboard = {
         'Lia':0,
         'Manu': 0,
         'Draw': 0
     }
 
-    for game_nr in range(nr_games_to_play):
-        if game_nr < 100:
+    for game_nr in  tqdm.tqdm(range(nr_games_to_play)):
+        if game_nr < gameShow:
             print("======= GAME nr {} STARTED =======".format(game_nr))
         who_plays = random.randint(0, 1)
         turn = 0
@@ -173,12 +197,12 @@ def main(args):
             [' ', ' ', ' ', ],
         ]
         while True:
-            if game_nr < 100:
+            if game_nr < gameShow:
                 print('turn', turn)
 
             if who_plays == 0:
                 row, column = lia_s_agent(board)
-                if game_nr < 100:
+                if game_nr < gameShow:
                     print('Lia picked',  row, column)
 
                 if board[row][column] != ' ':
@@ -193,7 +217,7 @@ def main(args):
                 else:
                     row, column = manu_s_agent(board)
 
-                if game_nr < 100:
+                if game_nr < gameShow:
                     print('Manu picked', row, column)
                 # this check if a new place is being overwritten
                 if board[row][column] != ' ':
@@ -203,7 +227,7 @@ def main(args):
                 who_plays = 0
 
             # end of the turn
-            if game_nr < 100:
+            if game_nr < gameShow:
                 for row in board:
                     print(row)
                 print()
@@ -212,25 +236,26 @@ def main(args):
             # checking who is the winner now
             winner = check_winner(board)
             if winner == 'X':
-                if game_nr < 100:
+                if game_nr < gameShow:
                     print("Manu wins a kiss from Lia")
                 leaderboard['Manu'] += 1
                 break
             elif winner == 'O':
-                if game_nr < 100:
+                if game_nr < gameShow:
                     print("Lia wins ten kisses from Manu")
                 leaderboard['Lia'] += 1
                 break
             # check if game is draw, and exit loop
             else:
                 if turn == 9:
-                    if game_nr < 100:
+                    if game_nr < gameShow:
                         print("It's a Draw")
                     leaderboard['Draw'] += 1
                     break
 
     total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
-    print("winning ratio", float(leaderboard['Lia'])/total_wins, leaderboard)
+    winningRatio = float(leaderboard['Lia'])/total_wins
+    return winningRatio
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
