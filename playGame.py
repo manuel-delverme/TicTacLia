@@ -31,7 +31,6 @@ def manu_s_agent(board):
 
     if board_string in manu_policy:
         return manu_policy[board_string]
-    # return pick_random_move(board)
     return pick_random_move(board)
 
 
