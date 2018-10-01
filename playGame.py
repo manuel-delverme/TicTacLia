@@ -33,6 +33,7 @@ def manu_s_agent(board):
 
     if board_string in manu_policy:
         return manu_policy[board_string]
+    # return pick_random_move(board)
     return pick_random_move(board)
 
 
@@ -47,30 +48,29 @@ def manu_input(board):
 
 
 def opponent(player):
+    """Returns the opposite sign playes by the current agent"""
     if player == 'X':
         return 'O'
     return 'X'
 
 
-def minimax(board, empty_cells, player):  # minimax(state, actions, player = 'O')
-    winner = check_winner(board)
+def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
+    """heiristic algorithm to improve the winning ratio"""
+    winner = check_winner(state)
 
     if winner != False:
         return (None, None), winner
 
     else:
-        for emptyCell in empty_cells:
-            newBoard = deepcopy(board)
-            row = emptyCell[0]
-            column = emptyCell[1]
-            newBoard[row][column] = player # insert 'O' in emptyCell
+        for action in actions:
+            newBoard = deepcopy(state)
+            row = action[0]
+            column = action[1]
+            newBoard[row][column] = player # insert 'O'
 
             # updates the empty_cells list and calls the function itself with the board as the newBoard
             newEmptyCells = findEmptyCells(newBoard)
-
             move, winner = minimax(newBoard, newEmptyCells, opponent(player))
-
-            # how do I insert Manu's moves?
 
             # output: who is going to win?
             # ----> 'O', 'X', DRAW
@@ -80,21 +80,22 @@ def minimax(board, empty_cells, player):  # minimax(state, actions, player = 'O'
 
             if winner == 'X':
                 pass
-        # in case it's a draw
-        output = pick_random_move(board)
+        # if it's a draw
+        # but let's improve it by finding the best move
+        output = pick_random_move(state)
         return output, winner
 
 
 def lia_s_agent(board):
-    empty_cells = findEmptyCells(board)
+    actions = findEmptyCells(board)
 
-    if len(empty_cells) == 9:
+    if len(actions) == 9:
         row = 1
         column = 1
         return row, column
 
     else:
-        output = minimax(board, empty_cells, player = 'O')
+        output = minimax(board, actions, player = 'O')
         return output[0]
 
 
@@ -153,7 +154,7 @@ def check_winner(board):
 
 def main(args):
     variances = []
-    nr_games_to_play = [10, 100, 1000]
+    nr_games_to_play = [10,100, 500] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
     for game_size in nr_games_to_play:
         samples = []
         for sample in range(5):
