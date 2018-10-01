@@ -48,7 +48,7 @@ def manu_input(board):
 
 
 def opponent(player):
-    """Returns the opposite sign playes by the current agent"""
+    """Returns the opposite sign played by the current agent"""
     if player == 'X':
         return 'O'
     return 'X'
