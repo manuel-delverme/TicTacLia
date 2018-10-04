@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 # import pandas as pd
 import os.path
+import functools
 
 
 def pick_random_move(board):
@@ -54,6 +55,7 @@ def opponent(player):
     return 'X'
 
 
+@functools.lru_cache(100000)
 def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
     """heiristic algorithm to improve the winning ratio"""
     winner = check_winner(state)
@@ -62,6 +64,8 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
         return (None, None), winner
 
     else:
+        state = (list([list(row) for row in state]))
+        draw_move = None
         for action in actions:
             newBoard = deepcopy(state)
             row = action[0]
@@ -69,32 +73,39 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
             newBoard[row][column] = player # insert 'O'
 
             # updates the empty_cells list and calls the function itself with the board as the newBoard
-            newEmptyCells = findEmptyCells(newBoard)
-            move, winner = minimax(newBoard, newEmptyCells, opponent(player))
+            _newBoard = (tuple([tuple(row) for row in newBoard]))
+            newEmptyCells = findEmptyCells(_newBoard)
+            move, winner = minimax(_newBoard, newEmptyCells, opponent(player))
 
             # output: who is going to win?
             # ----> 'O', 'X', DRAW
-            if winner == 'O':
-                # print("The winner is 'O'")
+            if winner == player:
                 return (row, column), winner
 
-            if winner == 'X':
+            if winner == opponent(player):
                 pass
+
+            if winner is None:
+                draw_move = (row, column)
         # if it's a draw
         # but let's improve it by finding the best move
-        output = pick_random_move(state)
-        return output, winner
+        if draw_move is not None:
+            return draw_move, None
+        else:
+            output = pick_random_move(state)
+            return output, opponent(player)
 
 
+@functools.lru_cache(10000)
 def lia_s_agent(board):
     actions = findEmptyCells(board)
 
-    if len(actions) == 9:
+    if len(actions) == 9 and False:
         row = 1
         column = 1
         return row, column
-
     else:
+        # # import ipdb; ipdb.set_trace()
         output = minimax(board, actions, player = 'O')
         return output[0]
 
@@ -104,13 +115,13 @@ def findEmptyCells(board):
     for rowLoop in range(len(board)):
         for columnLoop in range(len(board[rowLoop])):
             if board[rowLoop][columnLoop] == ' ':
-                empty_cells.append([rowLoop, columnLoop])
-    return empty_cells
+                empty_cells.append((rowLoop, columnLoop))
+    return tuple(empty_cells)
 
 
+@functools.lru_cache(10000)
 def check_winner(board):
     # check for matches and winner
-
     for j in range(len(board)):
         # check rows matches
         if board[j][0] == "X":
@@ -152,13 +163,13 @@ def check_winner(board):
         return False
 
 
-def main(args):
+def main(args=None):
     variances = []
-    nr_games_to_play = [10,100, 500] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
+    nr_games_to_play = [1000000, ] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
     for game_size in nr_games_to_play:
         samples = []
         for sample in range(5):
-            varRatio = play_games(args, game_size, 0)
+            varRatio = play_games(game_size, 0, args=args)
             samples.append(varRatio)
         variance = np.var(samples)
         variances.append(variance)
@@ -166,7 +177,8 @@ def main(args):
 
         print("The mean is {} and the variance of {} games size is: {}".format (mean, game_size, variance))
     plt.loglog(nr_games_to_play, variances)
-    plt.title("manu_is_drunk={}".format(args.manu_is_drunk))
+    if args is not None:
+        plt.title("manu_is_drunk={}".format(args.manu_is_drunk))
     try:
         plt.show()
     except UserError:
@@ -175,7 +187,7 @@ def main(args):
 
 
 
-def play_games(args, nr_games_to_play, gameShow):
+def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
     # nr_games_to_play = [10, 100, 1000, 10000]
     leaderboard = {
         'Lia':0,
@@ -183,7 +195,8 @@ def play_games(args, nr_games_to_play, gameShow):
         'Draw': 0
     }
 
-    for game_nr in  tqdm.tqdm(range(nr_games_to_play)):
+    # for game_nr in range(nr_games_to_play):
+    for game_nr in tqdm.tqdm(range(nr_games_to_play)):
         if game_nr < gameShow:
             print("======= GAME nr {} STARTED =======".format(game_nr))
         who_plays = random.randint(0, 1)
@@ -193,12 +206,14 @@ def play_games(args, nr_games_to_play, gameShow):
             [' ', ' ', ' ', ],
             [' ', ' ', ' ', ],
         ]
+        board_seq = []
+        frozen_board = (tuple([tuple(row) for row in board]))
         while True:
             if game_nr < gameShow:
                 print('turn', turn)
 
             if who_plays == 0:
-                row, column = lia_s_agent(board)
+                row, column = lia_s_agent(frozen_board)
                 if game_nr < gameShow:
                     print('Lia picked',  row, column)
 
@@ -209,17 +224,20 @@ def play_games(args, nr_games_to_play, gameShow):
                 who_plays = 1
 
             elif who_plays == 1:
-                if args.manu_is_drunk:
-                    row, column = pick_random_move(board)
+                if args is not None and args.manu_is_drunk:
+                    row, column = pick_random_move(frozen_board)
                 else:
-                    row, column = manu_s_agent(board)
+                    row, column = manu_s_agent(frozen_board)
 
                 if game_nr < gameShow:
                     print('Manu picked', row, column)
                 # this check if a new place is being overwritten
                 if board[row][column] != ' ':
-                    print('Manu cheated!')
-                    break
+                    if crash_on_cheat:
+                        print('Manu cheated!')
+                        break
+                    else:
+                        board[0] = ['O', 'O', 'O']
                 board[row][column] = 'X'
                 who_plays = 0
 
@@ -229,10 +247,17 @@ def play_games(args, nr_games_to_play, gameShow):
                     print(row)
                 print()
             turn += 1
+            frozen_board = (tuple([tuple(row) for row in board]))
+            board_seq.append(frozen_board)
 
             # checking who is the winner now
-            winner = check_winner(board)
+            winner = check_winner(frozen_board)
             if winner == 'X':
+                # for idx, b in enumerate(board_seq):
+                #     print(idx)
+                #     for row in b:
+                #         print(row)
+                #     print()
                 if game_nr < gameShow:
                     print("Manu wins a kiss from Lia")
                 leaderboard['Manu'] += 1
@@ -249,6 +274,7 @@ def play_games(args, nr_games_to_play, gameShow):
                 leaderboard['Draw'] += 1
                 break
 
+    print(leaderboard)
     total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
     winningRatio = float(leaderboard['Lia'])/total_wins
     return winningRatio
