@@ -5,6 +5,7 @@ import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import deepcopy
+import functools
 # import pandas as pd
 import os.path
 
@@ -48,12 +49,12 @@ def manu_input(board):
 
 
 def opponent(player):
-    """Returns the opposite sign played by the current agent"""
+    """Returns the opposite sign playes by the current agent"""
     if player == 'X':
         return 'O'
     return 'X'
 
-
+@functools.lru_cache(100000)
 def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
     """heiristic algorithm to improve the winning ratio"""
     winner = check_winner(state)
@@ -74,12 +75,13 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
 
             # output: who is going to win?
             # ----> 'O', 'X', DRAW
-            if winner == 'O':
-                # print("The winner is 'O'")
-                return (row, column), winner
-
-            if winner == 'X':
-                pass
+            if player == 'O':
+                if winner == 'O':
+                    # print("The winner is 'O'")
+                    return (row, column), winner
+            if player == 'X':
+                if winner == 'X':
+                    return (row, column), winner
         # if it's a draw
         # but let's improve it by finding the best move
         output = pick_random_move(state)
@@ -104,8 +106,8 @@ def findEmptyCells(board):
     for rowLoop in range(len(board)):
         for columnLoop in range(len(board[rowLoop])):
             if board[rowLoop][columnLoop] == ' ':
-                empty_cells.append([rowLoop, columnLoop])
-    return empty_cells
+                empty_cells.append((rowLoop, columnLoop))
+    return tuple(empty_cells)
 
 
 def check_winner(board):
