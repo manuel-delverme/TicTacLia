@@ -5,6 +5,7 @@ import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 from copy import deepcopy
+import functools
 # import pandas as pd
 import os.path
 import functools
@@ -49,11 +50,10 @@ def manu_input(board):
 
 
 def opponent(player):
-    """Returns the opposite sign played by the current agent"""
+    """Returns the opposite sign playes by the current agent"""
     if player == 'X':
         return 'O'
     return 'X'
-
 
 @functools.lru_cache(100000)
 def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
@@ -79,21 +79,18 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
 
             # output: who is going to win?
             # ----> 'O', 'X', DRAW
-            if winner == player:
-                return (row, column), winner
+            if player == 'O':
+                if winner == 'O':
+                    # print("The winner is 'O'")
+                    return (row, column), winner
+            if player == 'X':
+                if winner == 'X':
+                    return (row, column), winner
 
-            if winner == opponent(player):
-                pass
+        output = pick_random_move(state)
 
-            if winner is None:
-                draw_move = (row, column)
-        # if it's a draw
-        # but let's improve it by finding the best move
-        if draw_move is not None:
-            return draw_move, None
-        else:
-            output = pick_random_move(state)
-            return output, opponent(player)
+        #TODO: BUG HERE! vvvv
+        return output, winner
 
 
 @functools.lru_cache(10000)
@@ -105,7 +102,6 @@ def lia_s_agent(board):
         column = 1
         return row, column
     else:
-        # # import ipdb; ipdb.set_trace()
         output = minimax(board, actions, player = 'O')
         return output[0]
 
@@ -165,7 +161,7 @@ def check_winner(board):
 
 def main(args=None):
     variances = []
-    nr_games_to_play = [1000000, ] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
+    nr_games_to_play = [10000, ] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
     for game_size in nr_games_to_play:
         samples = []
         for sample in range(5):
