@@ -1,16 +1,18 @@
 """Tic Tac Toe Game between two lovers: input()"""
-import random
 import argparse
-import tqdm
-import numpy as np
-import matplotlib.pyplot as plt
-from copy import deepcopy
 import functools
 # import pandas as pd
 import os.path
-import functools
+import random
+from copy import deepcopy
 
+import matplotlib.pyplot as plt
+import numpy as np
+import tqdm
 from duplicity.errors import UserError
+
+from utils import findEmptyCells
+from utils import get_opponent
 
 
 def pick_random_move(board):
@@ -44,21 +46,7 @@ def manu_s_agent(board):
     return pick_random_move(board)
 
 
-def manu_input(board):
-    print("Please chose a row index, between 0 and 2:")
-    row = input()  # must be 0, 1 or 2
-    print("Please chose a column index, between 0 and 2:")
-    column = input()  # must be 0, 1, or 2
-    if board[row][column] != ' ':
-        return manu_input(board)
-    return row, column
 
-
-def opponent(player):
-    """Returns the opposite sign playes by the current agent"""
-    if player == 'X':
-        return 'O'
-    return 'X'
 
 
 @functools.lru_cache(100000)
@@ -84,7 +72,7 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
             _newBoard = (tuple([tuple(row) for row in newBoard]))
             newEmptyCells = findEmptyCells(_newBoard)
             # print("Who is the winner for?", newBoard)
-            move, winner = minimax(_newBoard, newEmptyCells, opponent(player))
+            move, winner = minimax(_newBoard, newEmptyCells, get_opponent(player))
             # print("The winner is", winner)
 
             # output: who is going to win?
@@ -117,15 +105,6 @@ def lia_s_agent(board):
     else:
         output = minimax(board, actions, player='O')
         return output[0]
-
-
-def findEmptyCells(board):
-    empty_cells = []  # count_freeSpace or depth
-    for rowLoop in range(len(board)):
-        for columnLoop in range(len(board[rowLoop])):
-            if board[rowLoop][columnLoop] == ' ':
-                empty_cells.append((rowLoop, columnLoop))
-    return tuple(empty_cells)
 
 
 @functools.lru_cache(10000)
