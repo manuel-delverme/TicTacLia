@@ -79,3 +79,19 @@ def check_winner(board):
             return "It's a Draw"
 
         return False
+
+
+def who_is_the_winner(winner, game_nr, gameShow):
+    if winner == 'X':
+        if game_nr < gameShow:
+            print("Manu wins ten kiss from Lia")
+        return 'Manu'
+    elif winner == 'O':
+        if game_nr < gameShow:
+            print("Lia wins ten kisses from Manu")
+        return 'Lia'
+    # check if game is draw, and exit loop
+    elif winner == "It's a Draw":
+        if game_nr < gameShow:
+            print("It's a Draw")
+        return 'Draw'

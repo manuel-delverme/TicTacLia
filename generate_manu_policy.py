@@ -7,9 +7,12 @@ def wound_i_win(board, row, column):
     if board[row][column] != ' ':
         return False
 
+    board = [list(b) for b in board]
     board[row][column] = 'O'
+    board = tuple([tuple(b) for b in board])
+
     answer = utils.check_winner(board)
-    board[row][column] = ' '
+
     return answer == 'O'
 
 

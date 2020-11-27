@@ -1,28 +1,20 @@
 """Tic Tac Toe Game between two lovers: input()"""
 import argparse
 import functools
-# import pandas as pd
 import os.path
 import random
-from copy import deepcopy
 
 import matplotlib.pyplot as plt
 import numpy as np
 import tqdm
 from duplicity.errors import UserError
 
+from agents.minimax import minimax
+from agents.q_learning import QLearning
+from agents.random import pick_random_move
+from utils import check_winner
 from utils import findEmptyCells
-from utils import get_opponent
-
-
-def pick_random_move(board):
-    row = random.randint(0, 2)
-    column = random.randint(0, 2)
-
-    if board[row][column] != ' ':
-        return pick_random_move(board)
-    return row, column
-
+from utils import who_is_the_winner
 
 manu_policy = {}
 
@@ -42,56 +34,8 @@ def manu_s_agent(board):
 
     if board_string in manu_policy:
         return manu_policy[board_string]
-    # return pick_random_move(board)
+
     return pick_random_move(board)
-
-
-
-
-
-@functools.lru_cache(100000)
-def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
-    """heiristic algorithm to improve the winning ratio"""
-    winner = check_winner(state)
-
-    if winner != False:
-        return (None, None), winner
-
-    else:
-        state = (list([list(row) for row in state]))
-        draw_move = None
-        # print("I am going to evaluate", actions)
-        for action in actions:
-            # print("Evaluated Action: ", action)
-            newBoard = deepcopy(state)
-            row = action[0]
-            column = action[1]
-            newBoard[row][column] = player  # insert 'O'
-
-            # updates the empty_cells list and calls the function itself with the board as the newBoard
-            _newBoard = (tuple([tuple(row) for row in newBoard]))
-            newEmptyCells = findEmptyCells(_newBoard)
-            # print("Who is the winner for?", newBoard)
-            move, winner = minimax(_newBoard, newEmptyCells, get_opponent(player))
-            # print("The winner is", winner)
-
-            # output: who is going to win?
-            # ----> 'O', 'X', DRAW
-            if player == 'O':
-                if winner == 'O':
-                    # print("The winner is 'O'")
-                    return (row, column), winner
-                if winner == "It's a Draw":
-                    draw_move = action
-
-            if player == 'X':
-                if winner == 'X':
-                    return (row, column), winner
-
-        output = pick_random_move(state)
-
-        # TODO: BUG HERE! vvvv
-        return output, winner
 
 
 @functools.lru_cache(10000)
@@ -107,68 +51,22 @@ def lia_s_agent(board):
         return output[0]
 
 
-@functools.lru_cache(10000)
-def check_winner(board):
-    # check for matches and winner
-    for j in range(len(board)):
-        # check rows matches
-        if board[j][0] == "X":
-            if (board[j][1] == "X") and (board[j][2] == "X"):
-                return "X"
-        if board[j][0] == "O":
-            if (board[j][1] == "O") and (board[j][2] == "O"):
-                return "O"
-
-        # Check columns matches
-        if board[0][j] == "X":
-            if (board[1][j] == "X") and (board[2][j] == "X"):
-                return "X"
-
-        if board[0][j] == "O":
-            if (board[1][j] == "O") and (board[2][j] == "O"):
-                return "O"
-
-        # Check Left Diagonal matches
-        if board[0][0] == "X":
-            if (board[1][1] == "X") and (board[2][2] == "X"):
-                return "X"
-        if board[0][0] == "O":
-            if (board[1][1] == "O") and (board[2][2] == "O"):
-                return "O"
-
-        # Check Right Diagonal matches
-        if board[0][2] == "X":
-            if (board[1][1] == "X") and (board[2][0] == "X"):
-                return "X"
-        if board[0][2] == "O":
-            if (board[1][1] == "O") and (board[2][0] == "O"):
-                return "O"
-
-        checkBoard = findEmptyCells(board)
-        if len(checkBoard) == 0:
-            return "It's a Draw"
-
-        return False
-
-
 def main(args=None):
     variances = []
     nr_games_to_play = [
-        10000, ]  # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
+        100000, ]  # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
     for game_size in nr_games_to_play:
         samples = []
         for sample in range(5):
-            varRatio = play_games(game_size, 0, args=args)
-            samples.append(varRatio)
+            var_ratio = play_games(game_size, 0, args=args)
+            samples.append(var_ratio)
         variance = np.var(samples)
         variances.append(variance)
         mean = np.mean(samples)
 
         print("The mean is {} and the variance of {} games size is: {}".format(mean, game_size, variance))
-    # plt.loglog(nr_games_to_play, variances)
-    plt.plot(variances)
-    if args is not None:
-        plt.title("manu_is_drunk={}".format(args.manu_is_drunk))
+    plt.loglog(nr_games_to_play, variances)
+    plt.title("manu_policy={}".format(args.manu_policy))
     try:
         plt.show()
     except UserError:
@@ -177,6 +75,10 @@ def main(args=None):
 
 
 def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
+    if args.manu_policy == "qlearning":
+        q_learning = QLearning()
+        previous_state = None
+
     # nr_games_to_play = [10, 100, 1000, 10000]
     leaderboard = {
         'Lia': 0,
@@ -213,10 +115,13 @@ def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
                 who_plays = 1
 
             elif who_plays == 1:
-                if args is not None and args.manu_is_drunk:
+                if args.manu_policy == "random":
                     row, column = pick_random_move(frozen_board)
-                else:
+                elif args.manu_policy == "not_drunk":
                     row, column = manu_s_agent(frozen_board)
+                elif args.manu_policy == "qlearning":
+                    previous_state = frozen_board
+                    row, column = q_learning.choose(frozen_board,game_nr)
 
                 if game_nr < gameShow:
                     print('Manu picked', row, column)
@@ -241,38 +146,32 @@ def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
 
             # checking who is the winner now
             winner = check_winner(frozen_board)
-            if winner == 'X':
-                # for idx, b in enumerate(board_seq):
-                #     print(idx)
-                #     for row in b:
-                #         print(row)
-                #     print()
-                if game_nr < gameShow:
-                    print("Manu wins a kiss from Lia")
-                leaderboard['Manu'] += 1
+
+            if winner:
+                name = who_is_the_winner(winner, game_nr, gameShow)
+                leaderboard[name] += 1
+                if args.manu_policy == "qlearning":
+                    reward = 0 if name == "Draw" else 1 if name == "Manu" else -1
+                    current_state = None
+                    q_learning.update(current_state,previous_state, (row,column),reward)
                 break
-            elif winner == 'O':
-                if game_nr < gameShow:
-                    print("Lia wins ten kisses from Manu")
-                leaderboard['Lia'] += 1
-                break
-            # check if game is draw, and exit loop
-            elif winner == "It's a Draw":
-                if game_nr < gameShow:
-                    print("It's a Draw")
-                leaderboard['Draw'] += 1
-                break
+            else:
+                if args.manu_policy == "qlearning":
+                    reward = 0
+                    q_learning.update(frozen_board,previous_state, (row,column),reward)
+
 
     print(leaderboard)
     total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
-    winningRatio = float(leaderboard['Lia']) / total_wins
-    return winningRatio
+    winning_ratio = float(leaderboard['Lia']) / total_wins
+    return winning_ratio
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--manu-is-drunk', '-M', dest='manu_is_drunk', action='store_true',
-                        help='check whether manu should play randomly')
+    parser.add_argument("--manu-policy", default="qlearning", choices=["not_drunk", "qlearning", "random"],
+                        help="chose Manu policy")
+
     args = parser.parse_args()
     main(args)
     print(args)
