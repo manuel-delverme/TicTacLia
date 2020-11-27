@@ -10,6 +10,8 @@ import functools
 import os.path
 import functools
 
+from duplicity.errors import UserError
+
 
 def pick_random_move(board):
     row = random.randint(0, 2)
@@ -19,7 +21,10 @@ def pick_random_move(board):
         return pick_random_move(board)
     return row, column
 
+
 manu_policy = {}
+
+
 def manu_s_agent(board):
     board_string = ''.join([item for sublist in board for item in sublist])
     if not os.path.isfile('manu_policy.txt'):
@@ -41,9 +46,9 @@ def manu_s_agent(board):
 
 def manu_input(board):
     print("Please chose a row index, between 0 and 2:")
-    row = input() # must be 0, 1 or 2
+    row = input()  # must be 0, 1 or 2
     print("Please chose a column index, between 0 and 2:")
-    column = input() # must be 0, 1, or 2
+    column = input()  # must be 0, 1, or 2
     if board[row][column] != ' ':
         return manu_input(board)
     return row, column
@@ -54,6 +59,7 @@ def opponent(player):
     if player == 'X':
         return 'O'
     return 'X'
+
 
 @functools.lru_cache(100000)
 def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
@@ -66,20 +72,20 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
     else:
         state = (list([list(row) for row in state]))
         draw_move = None
-        #print("I am going to evaluate", actions)
+        # print("I am going to evaluate", actions)
         for action in actions:
-            #print("Evaluated Action: ", action)
+            # print("Evaluated Action: ", action)
             newBoard = deepcopy(state)
             row = action[0]
             column = action[1]
-            newBoard[row][column] = player # insert 'O'
+            newBoard[row][column] = player  # insert 'O'
 
             # updates the empty_cells list and calls the function itself with the board as the newBoard
             _newBoard = (tuple([tuple(row) for row in newBoard]))
             newEmptyCells = findEmptyCells(_newBoard)
-            #print("Who is the winner for?", newBoard)
+            # print("Who is the winner for?", newBoard)
             move, winner = minimax(_newBoard, newEmptyCells, opponent(player))
-            #print("The winner is", winner)
+            # print("The winner is", winner)
 
             # output: who is going to win?
             # ----> 'O', 'X', DRAW
@@ -94,11 +100,9 @@ def minimax(state, actions, player):  # minimax(state, actions, player = 'O')
                 if winner == 'X':
                     return (row, column), winner
 
-
-
         output = pick_random_move(state)
 
-        #TODO: BUG HERE! vvvv
+        # TODO: BUG HERE! vvvv
         return output, winner
 
 
@@ -111,7 +115,7 @@ def lia_s_agent(board):
         column = 1
         return row, column
     else:
-        output = minimax(board, actions, player = 'O')
+        output = minimax(board, actions, player='O')
         return output[0]
 
 
@@ -170,7 +174,8 @@ def check_winner(board):
 
 def main(args=None):
     variances = []
-    nr_games_to_play = [10000, ] # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
+    nr_games_to_play = [
+        10000, ]  # try to get mean of same size like: [10,10,10,10,10], the winning ratio gets crazyly high
     for game_size in nr_games_to_play:
         samples = []
         for sample in range(5):
@@ -180,8 +185,9 @@ def main(args=None):
         variances.append(variance)
         mean = np.mean(samples)
 
-        print("The mean is {} and the variance of {} games size is: {}".format (mean, game_size, variance))
-    plt.loglog(nr_games_to_play, variances)
+        print("The mean is {} and the variance of {} games size is: {}".format(mean, game_size, variance))
+    # plt.loglog(nr_games_to_play, variances)
+    plt.plot(variances)
     if args is not None:
         plt.title("manu_is_drunk={}".format(args.manu_is_drunk))
     try:
@@ -191,11 +197,10 @@ def main(args=None):
         plt.savefig("/tmp/variance.png")
 
 
-
 def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
     # nr_games_to_play = [10, 100, 1000, 10000]
     leaderboard = {
-        'Lia':0,
+        'Lia': 0,
         'Manu': 0,
         'Draw': 0
     }
@@ -220,7 +225,7 @@ def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
             if who_plays == 0:
                 row, column = lia_s_agent(frozen_board)
                 if game_nr < gameShow:
-                    print('Lia picked',  row, column)
+                    print('Lia picked', row, column)
 
                 if board[row][column] != ' ':
                     print('Lia cheated!')
@@ -281,12 +286,14 @@ def play_games(nr_games_to_play, gameShow=0, args=None, crash_on_cheat=True):
 
     print(leaderboard)
     total_wins = float(leaderboard['Lia'] + leaderboard['Manu'])
-    winningRatio = float(leaderboard['Lia'])/total_wins
+    winningRatio = float(leaderboard['Lia']) / total_wins
     return winningRatio
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--manu_is_drunk', '-M', dest='manu_is_drunk', action='store_true', help='check whether manu should play randomly')
+    parser.add_argument('--manu-is-drunk', '-M', dest='manu_is_drunk', action='store_true',
+                        help='check whether manu should play randomly')
     args = parser.parse_args()
     main(args)
     print(args)
